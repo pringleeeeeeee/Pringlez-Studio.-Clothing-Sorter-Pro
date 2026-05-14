@@ -3,6 +3,7 @@ name: Discord Release Notification
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   notify:
@@ -11,29 +12,37 @@ jobs:
       - name: Send Discord embed
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          RELEASE_URL: ${{ github.event.release.html_url }}
-          RELEASE_ASSETS: ${{ toJson(github.event.release.assets) }}
-          RELEASE_DATE: ${{ github.event.release.published_at }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || 'test' }}
+          RELEASE_URL: ${{ github.event.release.html_url || 'https://github.com/pringleeeeeeee/Pringlez-Studio.-Clothing-Sorter-Pro/releases' }}
+          RELEASE_ASSETS: ${{ toJson(github.event.release.assets) || '[]' }}
+          RELEASE_DATE: ${{ github.event.release.published_at || '' }}
         run: |
-          python3 - << 'PYEOF'
+          python3 << 'PYEOF'
           import os, json, urllib.request
 
-          tag     = os.environ.get('RELEASE_TAG', 'Unknown')
-          url     = os.environ.get('RELEASE_URL', '')
-          date    = os.environ.get('RELEASE_DATE', '')
-          webhook = os.environ.get('DISCORD_WEBHOOK', '').strip().lstrip('﻿')
+          tag  = os.environ.get('RELEASE_TAG', 'Unknown')
+          url  = os.environ.get('RELEASE_URL', '')
+          date = os.environ.get('RELEASE_DATE', '')
+
+          # Strip BOM and whitespace from webhook URL
+          raw = os.environ.get('DISCORD_WEBHOOK', '')
+          webhook = raw.encode('utf-8').lstrip(b'\xef\xbb\xbf').decode('utf-8').strip()
+
+          print(f'Tag: {tag}')
+          print(f'Webhook starts with: {webhook[:8]}...')
 
           try:
-              assets = json.loads(os.environ.get('RELEASE_ASSETS', '[]'))
-              setup = next((a['browser_download_url'] for a in assets if 'Setup' in a['name'] and a['name'].endswith('.exe')), None)
+              assets_raw = os.environ.get('RELEASE_ASSETS', '[]')
+              assets = json.loads(assets_raw) if assets_raw and assets_raw != 'null' else []
+              setup    = next((a['browser_download_url'] for a in assets if 'Setup' in a['name'] and a['name'].endswith('.exe')), None)
               portable = next((a['browser_download_url'] for a in assets if 'Setup' not in a['name'] and a['name'].endswith('.exe')), None)
-          except Exception:
+          except Exception as e:
+              print(f'Asset parse error: {e}')
               setup = portable = None
 
           dl_setup    = f'[Setup Installer]({setup})' if setup else ''
           dl_portable = f'[Portable EXE]({portable})' if portable else ''
-          dl_line     = ' · '.join(filter(None, [dl_setup, dl_portable])) or f'[Download]({url})'
+          dl_line     = ' · '.join(filter(None, [dl_setup, dl_portable])) or f'[Download Here]({url})'
 
           embed = {
               'color': 9149430,
@@ -41,11 +50,19 @@ jobs:
               'description': f'**Version {tag}** is now available!\n\n{dl_line}',
               'url': url,
               'footer': {'text': 'Clothing Sorter Pro • Pringlez Studio'},
-              'timestamp': date,
+              'timestamp': date if date else None,
           }
 
+          if not embed['timestamp']:
+              del embed['timestamp']
+
           payload = json.dumps({'embeds': [embed]})
-          req = urllib.request.Request(webhook, data=payload.encode('utf-8'), headers={'Content-Type': 'application/json'}, method='POST')
+          req = urllib.request.Request(
+              webhook,
+              data=payload.encode('utf-8'),
+              headers={'Content-Type': 'application/json'},
+              method='POST'
+          )
           urllib.request.urlopen(req)
-          print('Sent!')
+          print('Discord notification sent!')
           PYEOF
