@@ -22,25 +22,30 @@ jobs:
           tag     = os.environ.get('RELEASE_TAG', 'Unknown')
           url     = os.environ.get('RELEASE_URL', '')
           date    = os.environ.get('RELEASE_DATE', '')
-          webhook = os.environ.get('DISCORD_WEBHOOK', '')
+          webhook = os.environ.get('DISCORD_WEBHOOK', '').strip().lstrip('﻿')
 
           try:
               assets = json.loads(os.environ.get('RELEASE_ASSETS', '[]'))
-              exe = next((a['browser_download_url'] for a in assets if a['name'].endswith('.exe')), url)
+              setup = next((a['browser_download_url'] for a in assets if 'Setup' in a['name'] and a['name'].endswith('.exe')), None)
+              portable = next((a['browser_download_url'] for a in assets if 'Setup' not in a['name'] and a['name'].endswith('.exe')), None)
           except Exception:
-              exe = url
+              setup = portable = None
+
+          dl_setup    = f'[Setup Installer]({setup})' if setup else ''
+          dl_portable = f'[Portable EXE]({portable})' if portable else ''
+          dl_line     = ' · '.join(filter(None, [dl_setup, dl_portable])) or f'[Download]({url})'
 
           embed = {
               'color': 9149430,
-              'title': '🚀 New Clothing Sorter Pro Update Available',
-              'description': f'**Version {tag}** is now available!\n\n[**Download Here**]({exe})',
+              'title': '\U0001f680 New Clothing Sorter Pro Update Available',
+              'description': f'**Version {tag}** is now available!\n\n{dl_line}',
               'url': url,
-              'footer': {'text': f'Clothing Sorter Pro • Pringlez Studio'},
+              'footer': {'text': 'Clothing Sorter Pro • Pringlez Studio'},
               'timestamp': date,
           }
 
           payload = json.dumps({'embeds': [embed]})
-          req = urllib.request.Request(webhook, data=payload.encode(), headers={'Content-Type': 'application/json'}, method='POST')
+          req = urllib.request.Request(webhook, data=payload.encode('utf-8'), headers={'Content-Type': 'application/json'}, method='POST')
           urllib.request.urlopen(req)
           print('Sent!')
           PYEOF
