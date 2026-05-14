@@ -24,12 +24,12 @@ jobs:
           url  = os.environ.get('RELEASE_URL', '')
           date = os.environ.get('RELEASE_DATE', '')
 
-          # Strip BOM and whitespace from webhook URL
+          # Strip BOM, whitespace, and normalise old discordapp.com domain
           raw = os.environ.get('DISCORD_WEBHOOK', '')
           webhook = raw.encode('utf-8').lstrip(b'\xef\xbb\xbf').decode('utf-8').strip()
+          webhook = webhook.replace('discordapp.com', 'discord.com')
 
           print(f'Tag: {tag}')
-          print(f'Webhook starts with: {webhook[:8]}...')
 
           try:
               assets_raw = os.environ.get('RELEASE_ASSETS', '[]')
@@ -50,11 +50,10 @@ jobs:
               'description': f'**Version {tag}** is now available!\n\n{dl_line}',
               'url': url,
               'footer': {'text': 'Clothing Sorter Pro • Pringlez Studio'},
-              'timestamp': date if date else None,
           }
 
-          if not embed['timestamp']:
-              del embed['timestamp']
+          if date:
+              embed['timestamp'] = date
 
           payload = json.dumps({'embeds': [embed]})
           req = urllib.request.Request(
