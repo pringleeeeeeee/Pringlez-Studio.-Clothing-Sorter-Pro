@@ -18,18 +18,18 @@ jobs:
           RELEASE_DATE: ${{ github.event.release.published_at || '' }}
         run: |
           python3 << 'PYEOF'
-          import os, json, urllib.request
+          import os, json, urllib.request, urllib.error
 
           tag  = os.environ.get('RELEASE_TAG', 'Unknown')
           url  = os.environ.get('RELEASE_URL', '')
           date = os.environ.get('RELEASE_DATE', '')
 
-          # Strip BOM, whitespace, and normalise old discordapp.com domain
           raw = os.environ.get('DISCORD_WEBHOOK', '')
           webhook = raw.encode('utf-8').lstrip(b'\xef\xbb\xbf').decode('utf-8').strip()
           webhook = webhook.replace('discordapp.com', 'discord.com')
 
           print(f'Tag: {tag}')
+          print(f'Webhook length: {len(webhook)}')
 
           try:
               assets_raw = os.environ.get('RELEASE_ASSETS', '[]')
@@ -51,7 +51,6 @@ jobs:
               'url': url,
               'footer': {'text': 'Clothing Sorter Pro • Pringlez Studio'},
           }
-
           if date:
               embed['timestamp'] = date
 
@@ -62,6 +61,11 @@ jobs:
               headers={'Content-Type': 'application/json'},
               method='POST'
           )
-          urllib.request.urlopen(req)
-          print('Discord notification sent!')
+          try:
+              urllib.request.urlopen(req)
+              print('Discord notification sent!')
+          except urllib.error.HTTPError as e:
+              body = e.read().decode('utf-8', errors='replace')
+              print(f'HTTP {e.code}: {body}')
+              raise
           PYEOF
