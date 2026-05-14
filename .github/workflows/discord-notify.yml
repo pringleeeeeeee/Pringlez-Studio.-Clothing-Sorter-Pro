@@ -1,0 +1,36 @@
+name: Discord Release Notification
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord webhook
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          RELEASE_URL="${{ github.event.release.html_url }}"
+          
+          # Find the .exe asset download URL
+          DOWNLOAD_URL=$(echo '${{ toJson(github.event.release.assets) }}' | python3 -c "
+          import json,sys
+          assets = json.load(sys.stdin)
+          exe = next((a['browser_download_url'] for a in assets if a['name'].endswith('.exe')), '$RELEASE_URL')
+          print(exe)
+          ")
+          
+          curl -s -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"content\": \"**New Update Available!** Download ${VERSION} here: ${DOWNLOAD_URL}\",
+              \"embeds\": [{
+                \"title\": \"Clothing Sorter Pro ${VERSION}\",
+                \"description\": \"A new update is available! Click the link above to download.\",
+                \"color\": 5793266,
+                \"footer\": { \"text\": \"Pringlez Studio\" }
+              }]
+            }"
