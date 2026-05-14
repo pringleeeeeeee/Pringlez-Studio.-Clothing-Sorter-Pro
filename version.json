@@ -1,14 +1,1 @@
-{
-  "version": "1.2.0",
-  "downloadUrl": "https://github.com/pringleeeeeeee/Pringlez-Studio.-Clothing-Sorter-Pro/releases/download/v1.2.0/Clothing.Sorter.Pro.Setup.1.2.0.exe",
-  "changelog": [
-    "Assign All To Folder — bulk-assign every drawable in one click",
-    "What's New splash screen on each update",
-    "Full color theme coverage across all UI elements",
-    "Dropdown menus now visible in dark mode",
-    "Improved setup wizard with export defaults step",
-    "Fixed caret separator drawable detection (e.g. rossicartelmale^accs)"
-  ],
-  "releaseDate": "2026-05-14",
-  "size": "79 MB"
-}
+{"version":"1.3.0","downloadUrl":"https://github.com/pringleeeeeeee/Pringlez-Studio.-Clothing-Sorter-Pro/releases/download/v1.3.0/Clothing.Sorter.Pro.Setup.1.3.0.exe","changelog":["New app branding","Full color theme coverage","Onboarding close animation","Simplified update settings"],"releaseDate":"2026-05-14","size":"79 MB"}
