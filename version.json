@@ -1,0 +1,16 @@
+{
+  "version": "1.6.0-alpha.1",
+  "releaseDate": "2026-05-18",
+  "downloadUrl": "https://github.com/pringleeeeeeee/Pringlez-Studio.-Clothing-Sorter-Pro/releases/download/v1.6.0-alpha.1/Clothing.Sorter.Pro.Setup.1.6.0-alpha.1.exe",
+  "portableUrl": "https://github.com/pringleeeeeeee/Pringlez-Studio.-Clothing-Sorter-Pro/releases/download/v1.6.0-alpha.1/Clothing.Sorter.Pro.1.6.0-alpha.1.exe",
+  "releaseNotesUrl": "https://github.com/pringleeeeeeee/Pringlez-Studio.-Clothing-Sorter-Pro/releases/tag/v1.6.0-alpha.1",
+  "size": "104 MB",
+  "changelog": [
+    "Custom Export rebuilt with multi-pack assignment, drag/drop packs, import/edit workflows, health checks, and bulk ID tools",
+    "Added automatic compiled RSC7 YMT generation for custom DLC names",
+    "Fixed DLC names ending with underscores so clothing no longer appears as empty slots",
+    "Added CodeWalker-powered 3D preview helper with GTA V folder setting and launch error feedback",
+    "Added resource clone workflow, duplicate drawable detection, fxmanifest encoding fix, and clearer build validation",
+    "Reworked Outfit Builder from placeholder into a usable outfit preset/export tool"
+  ]
+}
